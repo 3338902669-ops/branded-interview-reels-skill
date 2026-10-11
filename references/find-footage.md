@@ -157,3 +157,8 @@ Do not overwrite an approved original; add `..._v2` or a new dated folder.
 2. If local export exists on the user's machine or prior box cache, use that path.
 3. If missing ("we missed it"), ask the user to re-export/forward the media into an accessible folder — do not stall forever inventing alternate illegal copies.
 4. Once playable locally → resume at pipeline **B**.
+
+
+## After authorization (hand-off to B)
+
+Once a local authorized file exists, **stop finding** and open Step B with an explicit **单线叙事闸** choice (`narrative: A1 growth XOR A2 interview`) before crop/layout. Do not gather "both kinds of B-roll" as an excuse to mix lines later.

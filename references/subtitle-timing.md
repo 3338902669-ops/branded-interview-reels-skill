@@ -52,3 +52,14 @@ py scripts/validate_subtitle_timeline.py timeline.json --fps 24 --assets assets
 ```
 
 The script validates ordering, duration, and optional numbered `NN-subXX.png` assets. It does not assess spoken-language accuracy; that requires listening review.
+
+
+## Platform placement（字幕距底）
+
+| Platform | Baseline from bottom | Size | Stroke |
+|----------|----------------------|------|--------|
+| 视频号 | **~170 px** | **48–60 pt** | ~2px black |
+| 小红书 | ~140–160 px | 48–56 pt | ~2px |
+| Default 9:16 | ≥120 px | ≥44 pt | high contrast |
+
+Muted-viewer rule: burned-in Chinese must carry the cut with volume = 0. Sidecar `.srt` optional, not sufficient alone for release QA.

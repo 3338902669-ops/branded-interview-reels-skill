@@ -19,7 +19,7 @@ Preserve the source speaker and usable original audio. Make composition, headlin
 | Step | Goal | Gate before next |
 |------|------|------------------|
 | **A. Find footage** | Candidate URLs + local paths the user/boss authorize | Authorization checklist signed off; at least one usable local file **or** explicit stop |
-| **B. Select excerpt** | Speaker, topic, start/end, narrative line | One narrative line chosen (film **or** growth — never mixed) |
+| **B. Select excerpt** | Speaker, topic, start/end, narrative line | **单线叙事闸**: A1 growth **XOR** A2 interview — never mixed |
 | **C. Crop / reframe** | Face-safe plate for the mid window | Face complete; source UI cropped out where feasible |
 | **D. Layout / brand** | Upper/lower bars, large title, brand colors | Hierarchy: hook → speaker → subtitle |
 | **E. Subtitles** | ASR → phrase timing → Chinese lines → validate | Timeline JSON passes validator + listen review |
@@ -52,10 +52,11 @@ Platform search notes, query patterns, cache paths, and the no-local-file tree: 
 Before designing chrome:
 
 1. Identify **speaker**, **topic**, and exact **start/end** (source timeline seconds). Prefer one continuous thought arc (≈20–90s for interview-line cuts).
-2. Choose **one narrative line** and stick to it:
-   - **Film / interview line**: original speech slices only + short on-screen hooks.
-   - **Growth / résumé line**: timeline pops + photo/nodes — do **not** also stack long interview exposition.
-   Mixing both on one screen is a known reject pattern.
+2. **单线叙事闸（硬闸 · growth XOR interview）** — pick **exactly one**; mixing is a ship-blocker:
+   - **A1 成长时间线 (growth)**: timeline pops / photo-nodes / 机构 logo 按阶段跳出；视频窗若有则次要；**禁止**再叠长访谈原声解说。
+   - **A2 访谈原声 (interview)**: original speech slices only + short on-screen hooks；**禁止**再叠履历阶梯/多阶段成长弹出。
+   - Write the choice into the edit brief (`narrative: A1|A2`). Boss reject pattern: film + growth on one screen → 信息过载.
+   - Pre-cut checklist: 字面任务 ID vs 运营映射写清；模板 B / Susie 黑版参考是否对齐；每阶段机构 logo 是否齐；参考 mp4 缺则 **blocked**，不硬排。
 3. Note shot changes, burned-in captions, logos, and areas that must stay unmasked.
 4. Write an edit list: `SEGS=[(start,end), ...]` on the **source** clock, plus optional mild zoom per segment.
 5. Confirm language convention (e.g. Hong Kong-facing → Traditional Chinese; Mainland 视频号 → follow brand brief). If copy is paraphrase, do not present it as a verbatim quote.
@@ -125,6 +126,27 @@ Default MOSI-style **Template B** (上下栏) — see **[references/layout-templ
 - **Bottom bar**: name + role + one theme line; optional short popping list for growth-line cuts only.
 - Avoid iPhone Dynamic Island / notch collision for critical text.
 - Hand-edit hooks; do not ship stock AI filler copy.
+
+### Logo / 主体安全区（硬建议）
+
+| Zone | Rule |
+|------|------|
+| **Central ~80%** | Face, key title, **机构 logo** — keep inside the middle 80% of the 1080×1920 frame |
+| **Top ~10%** | Often eaten by status / notch / 平台顶栏 — no critical logo or hook baseline here |
+| **Bottom ~25%** | Platform UI (视频号/小红书/抖音) — no logo mark that must stay legible in-feed |
+| Face | Prefer upper third of the **footage window**; eyes with headroom |
+
+After export: open the mp4 on a **phone thumbnail** and a muted in-feed preview; if logo/title clips under UI, re-layout.
+
+### 字幕距底 · 平台表
+
+| Platform | 字幕基线距底（约） | 字号 | Notes |
+|----------|-------------------|------|-------|
+| **视频号** | **~170 px** from frame bottom | **48–60 pt** | 黑描边 ~2px；避开底栏与互动条 |
+| 小红书 | ~140–160 px | 48–56 pt | 收藏向；仍避底 UI |
+| 通用 9:16 | ≥120 px | ≥44 pt | 低于此当缺陷 |
+
+Burned-in captions are the release default; optional sidecar `.srt` is fine but not a substitute for the muted-viewer check.
 
 ### Minimal compositor (shipped)
 
@@ -210,6 +232,15 @@ project/
   work/            # plates, wav, timeline.json, sub PNGs
   deliver/vNN/     # final mp4, sheet, probe, sha256, notes
 ```
+
+### Export self-check（静音 / 缩略图）
+
+Before calling a cut "ready":
+
+1. **Mute replay**: watch full cut with system volume = 0 — every cue must still be understandable from burned-in 中文字幕 alone.
+2. **Thumbnail / first frame**: scrub t≈0 and the platform cover candidate; hook + face readable at phone-arm length; no logo in top 10% / bottom 25% danger bands.
+3. **In-feed UI overlay test**: mentally (or with a screenshot frame) place 视频号底栏；字幕基线仍 ≥~170px；logo 仍在中央 80%.
+4. Contact sheet includes at least one mid-cue and the final spoken phrase.
 
 Complete [references/qa.md](references/qa.md) before calling a local cut "ready".  
 **Do not** upload, post, publish, or send externally without separately explicit authorization.

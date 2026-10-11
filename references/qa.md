@@ -21,9 +21,17 @@
 - [ ] No subtitle remains through the start of a following thought.
 - [ ] Subtitle assets visibly change when timeline entries change.
 - [ ] Original burned-in captions and required source labels remain unobscured.
+- [ ] **Mute replay**: full cut understandable from burned-in 中文 alone (volume = 0).
+- [ ] **Thumbnail / cover**: t≈0 hook+face readable; logo/title not in top ~10% or bottom ~25% UI bands.
+- [ ] **字幕距底**: 视频号 baseline ~170px; size ~48–60pt; not under platform chrome.
 - [ ] `ffprobe` reports expected dimensions, rate, duration, audio, and frame count.
 - [ ] `ffmpeg -v error -i <output> -f null -` returns exit code 0.
 - [ ] Final media hashes and a contact sheet are saved with the delivery.
 - [ ] No upload/publish/send was performed without separately explicit authorization.
+
+## Narrative gate (before calling ready)
+
+- [ ] `narrative: A1` (growth) **XOR** `A2` (interview) recorded — not mixed.
+- [ ] Per-stage 机构 logo only on A1; long interview expo only on A2.
 
 These checks are local production checks. They are not an independent visual acceptance, a source-rights review, or publication approval.
