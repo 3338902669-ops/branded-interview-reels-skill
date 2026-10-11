@@ -73,14 +73,34 @@ Concrete FFmpeg pattern (adjust `w:h:x:y` after inspecting frames):
 ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,duration \
   -of json SOURCE.mp4 > SOURCE.ffprobe.json
 
-# Sample frames around the excerpt for face framing
+# Sample frames around the excerpt for face framing — open this before locking crop
 ffmpeg -v error -ss START -i SOURCE.mp4 -frames:v 1 -y /tmp/crop_check.png
 
-# Extract a face-favoring plate (example: crop then scale into template window)
+# Extract a face-favoring plate (crop then scale into template mid-window 1000x540)
 ffmpeg -v error -ss START -to END -i SOURCE.mp4 \
   -vf "crop=W:H:X:Y,hqdn3d=1.5:1.5:3:3,scale=1000:540:flags=lanczos,setsar=1" \
   -c:a copy -y work/plate.mp4
 ```
+
+### Numeric starting points (always verify on `crop_check.png`)
+
+Template mid-window is **1000×540**. Pick a source crop with the **same aspect (~16:9)** then let `scale=1000:540` fit it.
+
+| Source size | Starting `crop=W:H:X:Y` | Intent |
+|-------------|-------------------------|--------|
+| **1920×1080** landscape interview | `crop=1000:540:460:200` | ~center face; X=(1920−1000)/2≈460, Y≈200 leaves headroom |
+| **1920×1080**, face a bit left | `crop=1000:540:360:180` | nudge X down; re-check chin/forehead |
+| **1920×1080**, tighter punch-in (mild zoom) | `crop=934:504:493:220` | ≈1.07× tighter; keep face inside |
+| **1280×720** | `crop=1000:540:140:90` | same window math scaled to 720p |
+| **1080×1920** already vertical | `crop=1000:540:40:600` | take mid band; adjust Y to eyes |
+
+**How to estimate after `crop_check.png`:**
+
+1. Note face center `(fx, fy)` in source pixels (eye midpoint is enough).
+2. Choose `W,H` with `W/H ≈ 1000/540` (e.g. 1000×540 on 1080p).
+3. `X ≈ fx - W/2`, `Y ≈ fy - H/2.5` (slightly more room above the head than below).
+4. Clamp: `0 ≤ X ≤ src_w−W`, `0 ≤ Y ≤ src_h−H`.
+5. Re-export `crop_check` **after** crop (or render one plate frame) and confirm eyes/forehead/chin are inside — **do not ship the table values blindly**.
 
 Rules:
 
@@ -105,6 +125,30 @@ Default MOSI-style **Template B** (上下栏) — see **[references/layout-templ
 - **Bottom bar**: name + role + one theme line; optional short popping list for growth-line cuts only.
 - Avoid iPhone Dynamic Island / notch collision for critical text.
 - Hand-edit hooks; do not ship stock AI filler copy.
+
+### Minimal compositor (shipped)
+
+Use `scripts/compose_template_b.py` to drop a plate into Template B and emit a **1080×1920** PNG or a short MP4 stub (layout proof before a full timed render):
+
+```bash
+# Still from a plate image
+python3 scripts/compose_template_b.py \
+  --plate work/plate_frame.png \
+  --bg '#000000' \
+  --series 'MOSI｜成长观察' --ep '01' \
+  --title '离开斯坦福那天' --title2 '教授只说了一句话' \
+  --name '埃隆·马斯克' --topic 'Zip2 / PayPal 共同创始人' \
+  --subtitle '我在斯坦福办了休学' \
+  --out work/layout_stub.png
+
+# Short mp4 stub from plate video (holds composed still; optional plate audio)
+python3 scripts/compose_template_b.py \
+  --plate work/plate.mp4 --plate-at 0.5 \
+  --title '钩子一行' --name '姓名' --topic '身份' \
+  --out work/layout_stub.mp4 --seconds 3
+```
+
+Full motion + per-cue subtitle animation can still use a project renderer; this script is the **minimum layout entry** so step D is not invent-your-own.
 
 ---
 
@@ -138,7 +182,7 @@ Full contract: [references/subtitle-timing.md](references/subtitle-timing.md).
 
 ## F) Export + QA
 
-Prefer deterministic local tools: FFmpeg for decode/crop/encode; a renderer that consumes one explicit subtitle timeline.
+Prefer deterministic local tools: FFmpeg for decode/crop/encode; a renderer that consumes one explicit subtitle timeline. For a layout proof before full timing, re-run `scripts/compose_template_b.py` from step D.
 
 ```bash
 # Stream facts
@@ -147,8 +191,12 @@ ffprobe -v error -show_format -show_streams -of json OUT.mp4 > OUT.ffprobe.json
 # Full decode sanity
 ffmpeg -v error -i OUT.mp4 -f null - ; echo exit:$?
 
-# Contact sheet (example helper pattern: sample timestamps)
-python3 path/to/sheet.py OUT.mp4 OUT-sheet.jpg "0.5,3.8,8.0,15.5,23.0,34.0"
+# Contact sheet (shipped helper)
+python3 scripts/make_contact_sheet.py OUT.mp4 OUT-sheet.jpg \
+  --times 0.5,3.8,8.0,15.5,23.0,34.0
+
+# Equivalent pure-ffmpeg tile (optional; unlabeled)
+# ffmpeg -v error -i OUT.mp4 -vf "select='eq(n,0)+eq(n,90)',scale=360:640,tile=3x2" -frames:v 1 -y OUT-sheet.jpg
 
 # Integrity
 sha256sum OUT.mp4 OUT-sheet.jpg | tee OUT.sha256
@@ -174,3 +222,4 @@ Complete [references/qa.md](references/qa.md) before calling a local cut "ready"
 - "Find footage" stops at candidates + authorized local cache. No piracy, no credential stuffing, no undocumented third-party bypass.
 - Keep source logos/watermarks only where requested or where removal would be misleading.
 - Timing validator: `scripts/validate_subtitle_timeline.py`.
+- Layout stub: `scripts/compose_template_b.py`. Contact sheet: `scripts/make_contact_sheet.py`.

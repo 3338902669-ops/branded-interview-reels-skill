@@ -78,6 +78,7 @@ Boss reject pattern: mixing film narrative and growth résumé until "看不懂.
 
 ## Implementation notes (tool-agnostic)
 
+- **Shipped entry:** `scripts/compose_template_b.py` (Pillow) paints Template B around a plate image/video and writes a 1080×1920 PNG or short MP4 stub. See SKILL.md step D.
 - Compose bars in any renderer (Pillow/HTML/AE); feed the **cropped plate** into the mid window via FFmpeg or frame pipe.
 - Keep fps fixed (24 or 30) from plate through mux; loudnorm audio after concat if segments are joined.
 - End card optional; still no publish without separate authorization.
